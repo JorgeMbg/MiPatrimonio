@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mi Patrimonio - Control Profesional</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <!-- PWA & iOS Safari tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Patrimonio">
+  <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=180&auto=format&fit=crop">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Header Navigation (Estilo iOS Professional Polish) -->
+    <header class="ios-header">
+      <div class="ios-header-container">
+        <div class="header-logo-group">
+          <div class="app-logo">
+            <div class="logo-circle"></div>
+          </div>
+          <h1 class="ios-header-title">Patrimonio Neto</h1>
+        </div>
+        <div class="header-actions">
+          <span class="offline-badge">OFFLINE MODE</span>
+          <button class="add-header-btn" onclick="openAddModal()">+ Añadir</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="ios-container">
+      <!-- VISTA: RESUMEN (POR DEFECTO) -->
+      <div id="view-resumen">
+      <!-- Tarjeta de Resumen Principal -->
+      <section class="net-worth-hero">
+        <p class="net-worth-label">Balance Total</p>
+        <div class="net-worth-amount" id="total-net-worth">0,00 €</div>
+        
+
+        <!-- Barra de distribución visual -->
+        <div class="distribution-bar">
+          <div class="bar-segment cuentas-bar" id="bar-cuentas" style="width: 0%"></div>
+          <div class="bar-segment inversiones-bar" id="bar-inversiones" style="width: 0%"></div>
+          <div class="bar-segment otros-bar" id="bar-otros" style="width: 0%"></div>
+        </div>
+        
+        <!-- Leyenda interactiva -->
+        <div class="distribution-legend">
+          <div class="legend-item">
+            <span class="legend-dot cuentas-color"></span>
+            <span class="legend-text">Cuentas: <b id="lbl-cuentas-pct">0%</b></span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot inversiones-color"></span>
+            <span class="legend-text">Inversión: <b id="lbl-inversiones-pct">0%</b></span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot otros-color"></span>
+            <span class="legend-text">Otros: <b id="lbl-otros-pct">0%</b></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Grid de Categorías (Adaptable Móvil / Escritorio) -->
+      <section class="categories-grid">
+        <!-- CATEGORÍA 1: Cuentas Bancarias -->
+        <div class="category-column">
+          <div class="category-header">
+            <h3 class="category-title">Cuentas Bancarias</h3>
+            <span class="category-total" id="total-cuentas-header">0,00 €</span>
+          </div>
+          <div class="ios-list-group" id="list-cuentas">
+            <!-- Generado dinámicamente -->
+          </div>
+        </div>
+
+        <!-- CATEGORÍA 2: Inversiones -->
+        <div class="category-column">
+          <div class="category-header">
+            <h3 class="category-title">Inversiones y Bolsa</h3>
+            <span class="category-total" id="total-inversiones-header">0,00 €</span>
+          </div>
+          <div class="ios-list-group" id="list-inversiones">
+            <!-- Generado dinámicamente -->
+          </div>
+        </div>
+
+        <!-- CATEGORÍA 3: Otros Activos -->
+        <div class="category-column">
+          <div class="category-header">
+            <h3 class="category-title">Otros Activos</h3>
+            <span class="category-total" id="total-otros-header">0,00 €</span>
+          </div>
+          <div class="ios-list-group" id="list-otros">
+            <!-- Generado dinámicamente -->
+          </div>
+        </div>
+      </section>
+      </div>
+
+      <!-- VISTA: HISTÓRICO -->
+      <div id="view-historico" style="display: none;">
+        <header class="view-header">
+          <h2 class="view-title">Histórico de Snapshots</h2>
+          <button class="add-snapshot-btn" onclick="openSnapshotModal()">Guardar Snapshot</button>
+        </header>
+        <div id="snapshot-list" class="snapshot-list-container">
+          <!-- Snapshots generados dinámicamente -->
+        </div>
+      </div>
+
+      <!-- VISTA: AJUSTES -->
+      <div id="view-ajustes" style="display: none;">
+        <header class="view-header">
+          <h2 class="view-title">Ajustes</h2>
+        </header>
+        <div class="ios-list-group">
+          <div class="ios-list-item">
+            <div class="item-left">
+              <span class="item-name">Modo Oscuro</span>
+            </div>
+            <div class="item-right">
+              <label class="ios-switch">
+                <input type="checkbox" id="dark-mode-toggle">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+          <div class="ios-list-item">
+            <div class="item-left">
+              <span class="item-name">Modo Discreto</span>
+            </div>
+            <div class="item-right">
+              <label class="ios-switch">
+                <input type="checkbox" id="discreet-mode-toggle">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+          <div class="ios-list-item" onclick="openPinSetup()">
+            <div class="item-left">
+              <span class="item-name">Seguridad (PIN)</span>
+              <span class="item-subtitle" id="pin-status-text">Desactivado</span>
+            </div>
+            <div class="item-right">
+              <span style="color: var(--ios-gray-dark); font-size: 20px; font-weight: 400; line-height: 1;">›</span>
+            </div>
+          </div>
+          <!-- Opción principal de Copia de Seguridad -->
+          <div class="ios-list-item" onclick="openBackupSubmenu()">
+            <div class="item-left">
+              <span class="item-name">Copia de Seguridad</span>
+            </div>
+            <div class="item-right">
+              <span style="color: var(--ios-gray-dark); font-size: 20px; font-weight: 400; line-height: 1;">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Subvista de Copia de Seguridad -->
+      <div id="view-backup-menu" style="display: none;">
+        <header class="view-header">
+          <button class="ios-modal-btn cancel" onclick="closeBackupSubmenu()" style="padding: 0; font-size: 16px;">◀ Volver</button>
+          <h2 class="view-title">Copia de Seguridad</h2>
+          <div style="width: 60px;"></div>
+        </header>
+        <div class="ios-list-group">
+          <div class="ios-list-item" onclick="exportData()">
+            <div class="item-left">
+              <span class="item-name">Exportar Copia de Seguridad</span>
+            </div>
+          </div>
+          <div class="ios-list-item" onclick="document.getElementById('import-file').click()">
+            <div class="item-left">
+              <span class="item-name">Importar Copia de Seguridad</span>
+            </div>
+            <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Tab Bar navigation -->
+    <nav class="bottom-tab-bar">
+      <div class="tab-item active" id="tab-resumen" onclick="switchView('resumen')">
+        <svg class="tab-icon" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Resumen</span>
+      </div>
+      <div class="tab-item" id="tab-historico" onclick="switchView('historico')">
+        <svg class="tab-icon" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Histórico</span>
+      </div>
+      <div class="tab-item" id="tab-ajustes" onclick="switchView('ajustes')">
+        <svg class="tab-icon" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Ajustes</span>
+      </div>
+    </nav>
+
+  <!-- MODAL: AÑADIR ACTIVO -->
+  <div class="ios-modal-overlay" id="add-modal">
+    <div class="ios-modal-sheet">
+      <div class="ios-modal-header">
+        <button class="ios-modal-btn cancel" onclick="closeAddModal()">Cancelar</button>
+        <span class="ios-modal-title">Nuevo Activo</span>
+        <button class="ios-modal-btn save" onclick="submitAddAsset()">Añadir</button>
+      </div>
+      <form class="ios-modal-form" onsubmit="event.preventDefault(); submitAddAsset();">
+        <div class="ios-form-group">
+          <label class="ios-form-label">NOMBRE</label>
+          <input type="text" class="ios-form-input" id="add-name" placeholder="Ej: BBVA, Cuenta Ahorro, Coche..." required>
+        </div>
+        <div class="ios-form-group">
+          <label class="ios-form-label">CATEGORÍA</label>
+          <select class="ios-form-select" id="add-category" onchange="toggleInversionesFields('add')">
+            <option value="cuentas">Cuentas Bancarias y Efectivo</option>
+            <option value="inversiones">Inversiones y Bolsa</option>
+            <option value="otros">Otros Activos y Propiedades</option>
+          </select>
+        </div>
+        <!-- Campos específicos de Inversiones (ocultos por defecto) -->
+        <div id="add-inversiones-fields" style="display: none;">
+          <div class="ios-form-group">
+            <label class="ios-form-label">NÚMERO DE ACCIONES/ETF</label>
+            <input type="number" step="any" class="ios-form-input" id="add-shares" placeholder="Ej: 10" oninput="calculateTotalValue('add')">
+          </div>
+          <div class="ios-form-group">
+            <label class="ios-form-label">PRECIO UNITARIO (€)</label>
+            <input type="number" step="0.0001" class="ios-form-input" id="add-unit-price" placeholder="Ej: 87.5" oninput="calculateTotalValue('add')">
+          </div>
+        </div>
+        <div class="ios-form-group">
+          <label class="ios-form-label">VALOR ACTUAL (€)</label>
+          <input type="number" step="0.01" class="ios-form-input" id="add-value" placeholder="Ej: 5400" required>
+        </div>
+        <div class="ios-form-group">
+          <label class="ios-form-label">COSTE ORIGINAL (€)</label>
+          <input type="number" step="0.01" class="ios-form-input" id="add-original-cost" placeholder="Ej: 5000">
+        </div>
+        <div class="ios-form-group">
+          <label class="ios-form-label">FECHA DE ÚLTIMA ACTUALIZACIÓN</label>
+          <input type="date" class="ios-form-input" id="add-date" required>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR ACTIVO -->
+  <div class="ios-modal-overlay" id="edit-modal">
+    <div class="ios-modal-sheet">
+      <div class="ios-modal-header">
+        <button class="ios-modal-btn cancel" onclick="closeEditModal()">Cancelar</button>
+        <span class="ios-modal-title">Editar Activo</span>
+        <button class="ios-modal-btn save" onclick="submitEditAsset()">Guardar</button>
+      </div>
+      <form class="ios-modal-form" onsubmit="event.preventDefault(); submitEditAsset();">
+        <input type="hidden" id="edit-id">
+        <div class="ios-form-group">
+          <label class="ios-form-label">NOMBRE</label>
+          <input type="text" class="ios-form-input" id="edit-name" required>
+        </div>
+        <div class="ios-form-group">
+          <label class="ios-form-label">CATEGORÍA</label>
+          <select class="ios-form-select" id="edit-category" onchange="toggleInversionesFields('edit')">
+            <option value="cuentas">Cuentas Bancarias y Efectivo</option>
+            <option value="inversiones">Inversiones y Bolsa</option>
+            <option value="otros">Otros Activos y Propiedades</option>
+          </select>
+        </div>
+        <!-- Campos específicos de Inversiones (ocultos por defecto) -->
+        <div id="edit-inversiones-fields" style="display: none;">
+          <div class="ios-form-group">
+            <label class="ios-form-label">NÚMERO DE ACCIONES/ETF</label>
+            <input type="number" step="any" class="ios-form-input" id="edit-shares" oninput="calculateTotalValue('edit')">
+          </div>
+          <div class="ios-form-group">
+            <label class="ios-form-label">PRECIO UNITARIO (€)</label>
+            <input type="number" step="0.0001" class="ios-form-input" id="edit-unit-price" oninput="calculateTotalValue('edit')">
+          </div>
+        </div>
+        <div class="ios-form-group">
+          <label class="ios-form-label">VALOR ACTUAL (€)</label>
+          <input type="number" step="0.01" class="ios-form-input" id="edit-value" required>
+        </div>
+        <div class="ios-form-group">
+          <label class="ios-form-label">COSTE ORIGINAL (€)</label>
+          <input type="number" step="0.01" class="ios-form-input" id="edit-original-cost">
+        </div>
+        <div class="ios-form-group">
+          <label class="ios-form-label">FECHA DE ÚLTIMA ACTUALIZACIÓN</label>
+          <input type="date" class="ios-form-input" id="edit-date" required>
+        </div>
+        <div style="padding: 16px 0;">
+          <button type="button" class="ios-btn-danger" onclick="triggerDeleteAsset()">Eliminar Activo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALLE DE SNAPSHOT -->
+  <div class="ios-modal-overlay" id="snapshot-detail-modal">
+    <div class="ios-modal-sheet">
+      <div class="ios-modal-header">
+        <button class="ios-modal-btn cancel" onclick="closeSnapshotDetailModal()">Cerrar</button>
+        <span class="ios-modal-title" id="detail-snapshot-title">Detalle Snapshot</span>
+        <div style="width: 60px;"></div> <!-- Spacer para equilibrar -->
+      </div>
+      <div class="ios-modal-form" style="max-height: 70vh; overflow-y: auto;">
+        <div id="snapshot-detail-content">
+          <!-- Detalles generados dinámicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- MODAL: GUARDAR SNAPSHOT -->
+    <div class="ios-modal-overlay" id="snapshot-modal">
+      <div class="ios-modal-sheet">
+        <div class="ios-modal-header">
+          <button class="ios-modal-btn cancel" onclick="closeSnapshotModal()">Cancelar</button>
+          <span class="ios-modal-title">Guardar Snapshot</span>
+          <button class="ios-modal-btn save" onclick="submitSnapshot()">Guardar</button>
+        </div>
+        <form class="ios-modal-form" onsubmit="event.preventDefault(); submitSnapshot();">
+          <div class="ios-form-group">
+            <p style="font-size: 14px; color: #3a3a3c; margin-bottom: 12px; padding: 0 12px;">Se guardará una copia exacta de todos tus activos actuales para esta fecha.</p>
+            <label class="ios-form-label">FECHA DEL SNAPSHOT</label>
+            <input type="date" class="ios-form-input" id="snapshot-date" required>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- PANTALLA DE BLOQUEO -->
+    <div id="pin-lock-screen" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: #f2f2f7; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <h2 style="margin-bottom: 20px;">Introduce tu PIN</h2>
+      <div id="pin-dots" style="display: flex; gap: 10px; margin-bottom: 40px;">
+        <div class="pin-dot"></div>
+        <div class="pin-dot"></div>
+        <div class="pin-dot"></div>
+        <div class="pin-dot"></div>
+      </div>
+      <div id="pin-pad" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 240px;">
+        <button class="pin-key" onclick="pinInput(1)">1</button>
+        <button class="pin-key" onclick="pinInput(2)">2</button>
+        <button class="pin-key" onclick="pinInput(3)">3</button>
+        <button class="pin-key" onclick="pinInput(4)">4</button>
+        <button class="pin-key" onclick="pinInput(5)">5</button>
+        <button class="pin-key" onclick="pinInput(6)">6</button>
+        <button class="pin-key" onclick="pinInput(7)">7</button>
+        <button class="pin-key" onclick="pinInput(8)">8</button>
+        <button class="pin-key" onclick="pinInput(9)">9</button>
+        <div style="width: 100%;"></div>
+        <button class="pin-key" onclick="pinInput(0)">0</button>
+        <button class="pin-key" onclick="pinDelete()">⌫</button>
+      </div>
+    </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
