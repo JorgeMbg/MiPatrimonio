@@ -75,6 +75,33 @@ document.addEventListener('DOMContentLoaded', () => {
       renderApp();
     });
   }
+
+  // Configuración Biometría
+  const bioToggle = document.getElementById('biometric-toggle');
+  const isBioEnabled = localStorage.getItem('biometric_enabled') === 'true';
+  if (bioToggle) {
+    bioToggle.checked = isBioEnabled;
+    document.getElementById('biometric-status-text').textContent = isBioEnabled ? 'Activado' : 'Desactivado';
+    bioToggle.addEventListener('change', async (e) => {
+      if (e.target.checked) {
+        const registered = await registerBiometric();
+        if (registered) {
+          localStorage.setItem('biometric_enabled', 'true');
+          document.getElementById('biometric-status-text').textContent = 'Activado';
+        } else {
+          e.target.checked = false;
+        }
+      } else {
+        localStorage.setItem('biometric_enabled', 'false');
+        document.getElementById('biometric-status-text').textContent = 'Desactivado';
+      }
+    });
+  }
+
+  // Autenticación al inicio
+  if (isBioEnabled && (pin && pin !== 'null' && pin !== '' && pin !== null)) {
+      authenticateBiometric();
+  }
 });
 
 function saveToLocalStorage() {
@@ -711,4 +738,62 @@ function openSnapshotDetail(id) {
 
 function closeSnapshotDetailModal() {
   document.getElementById('snapshot-detail-modal').classList.remove('active');
+}
+
+// --- WEBAUTHN BIOMETRY ---
+async function registerBiometric() {
+  if (!window.PublicKeyCredential) {
+    alert('Biometría no soportada en este navegador.');
+    return false;
+  }
+  
+  try {
+    const challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+    
+    const options = {
+      publicKey: {
+        challenge,
+        rp: { name: "MiPatrimonio" },
+        user: {
+          id: new Uint8Array([1]),
+          name: "usuario@app.local",
+          displayName: "Usuario"
+        },
+        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+        timeout: 60000,
+        attestation: "direct"
+      }
+    };
+    
+    await navigator.credentials.create(options);
+    return true;
+  } catch (err) {
+    console.error('Error al registrar biometría:', err);
+    return false;
+  }
+}
+
+async function authenticateBiometric() {
+  if (!window.PublicKeyCredential) return false;
+  
+  try {
+    const challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+    
+    const options = {
+      publicKey: {
+        challenge,
+        timeout: 60000,
+        userVerification: "required"
+      }
+    };
+    
+    await navigator.credentials.get(options);
+    document.getElementById('pin-lock-screen').style.display = 'none';
+    return true;
+  } catch (err) {
+    console.error('Error al autenticar biometría:', err);
+    return false;
+  }
 }
