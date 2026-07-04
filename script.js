@@ -1,13 +1,4 @@
 // --- ESTADO INICIAL Y DATOS ---
-const DEFAULT_ASSETS = [
-  { id: '1', name: 'Cuenta Corriente BBVA', value: 5400, category: 'cuentas', date: getTodayDateString() },
-  { id: '2', name: 'Efectivo en Cartera', value: 350, category: 'cuentas', date: getTodayDateString() },
-  { id: '3', name: 'Trade Republic (Efectivo 4%)', value: 12500, category: 'inversiones', date: getTodayDateString() },
-  { id: '4', name: 'ETF MSCI World (iShares)', value: 8750, category: 'inversiones', date: getTodayDateString(), shares: 100, unitPrice: 87.5 },
-  { id: '5', name: 'Vivienda Habitual (Valor estimado)', value: 165000, category: 'otros', date: getTodayDateString() },
-  { id: '6', name: 'Coche (Tasación actual)', value: 12000, category: 'otros', date: getTodayDateString() }
-];
-
 let assets = [];
 let snapshots = [];
 let darkMode = false; // Estado del modo oscuro
@@ -44,11 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (migrated) saveToLocalStorage();
     } catch (e) {
-      assets = [...DEFAULT_ASSETS];
+      assets = [];
     }
-  } else {
-    assets = [...DEFAULT_ASSETS];
-    saveToLocalStorage();
   }
 
   // Cargar snapshots de localStorage
