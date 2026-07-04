@@ -1,4 +1,4 @@
-// --- ESTADO INICIAL Y DATOS --- 
+// --- ESTADO INICIAL Y DATOS ---
 let assets = [];
 let snapshots = [];
 let darkMode = false; // Estado del modo oscuro
